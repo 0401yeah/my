@@ -16,8 +16,7 @@ export default ({ mode }: { mode: string }) => {
   const env = loadEnv(mode, root)
   const { VITE_VERSION, VITE_PORT, VITE_BASE_URL, VITE_API_URL, VITE_API_PROXY_URL } = env
 
-  console.log(`🚀 API_URL = ${VITE_API_URL}`)
-  console.log(`🚀 VERSION = ${VITE_VERSION}`)
+
 
   return defineConfig({
     define: {
@@ -29,10 +28,15 @@ export default ({ mode }: { mode: string }) => {
       proxy: {
         '/api': {
           target: VITE_API_PROXY_URL,
-          changeOrigin: true
+          changeOrigin: true,
+          rewrite: (path) => path
         }
       },
-      host: true
+      host: true,
+      watch: {
+        // 排除不需要监听的目录
+        ignored: ['**/node_modules/**', '**/dist/**', '**/logs/**']
+      }
     },
     // 路径别名
     resolve: {

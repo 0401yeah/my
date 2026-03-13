@@ -1,19 +1,22 @@
 <!-- 进度条卡片 -->
 <template>
   <div class="art-card h-32 flex flex-col justify-center px-5">
-    <div class="mb-3.5 flex-c" :style="{ justifyContent: icon ? 'space-between' : 'flex-start' }">
+    <div class="mb-3.5 flex items-center">
       <div v-if="icon" class="size-11 flex-cc bg-g-300 text-xl rounded-lg" :class="iconStyle">
         <ArtSvgIcon :icon="icon" class="text-2xl"></ArtSvgIcon>
       </div>
-      <div>
+      <div v-if="props.titlePosition === 'icon-right' && icon" class="ml-4">
+        <p class="text-sm text-g-500">{{ title }}</p>
+        <p v-if="extraInfo" class="text-lg font-medium">{{ extraInfo }}</p>
+      </div>
+      <div class="flex-1 text-right">
         <ArtCountTo
           class="mb-1 block text-2xl font-semibold"
           :target="percentage"
           :duration="2000"
           suffix="%"
-          :style="{ textAlign: icon ? 'right' : 'left' }"
         />
-        <p class="text-sm text-g-500">{{ title }}</p>
+        <p v-if="props.titlePosition === 'bottom'" class="text-sm text-g-500">{{ title }}</p>
       </div>
     </div>
     <ElProgress
@@ -42,11 +45,17 @@
     iconStyle?: string
     /** 进度条宽度 */
     strokeWidth?: number
+    /** 额外信息，如车位数量 */
+    extraInfo?: string
+    /** 标题位置，默认在百分比下方，设置为 'icon-right' 时显示在图标右侧 */
+    titlePosition?: 'bottom' | 'icon-right'
   }
 
   const props = withDefaults(defineProps<Props>(), {
     strokeWidth: 5,
-    color: '#67C23A'
+    color: '#67C23A',
+    extraInfo: '',
+    titlePosition: 'bottom'
   })
 
   const animationDuration = 500

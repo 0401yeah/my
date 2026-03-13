@@ -172,6 +172,13 @@ html.dark .el-card {
   }
 }
 
+// 消息提示居中显示
+.el-message {
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  margin-left: 0 !important;
+}
+
 // 修改 el-dropdown 样式
 .el-dropdown-menu {
   padding: 6px !important;

@@ -32,3 +32,6 @@ export * from './form'
 
 // socket 相关
 export * from './socket'
+
+// 时间格式化相关
+export * from './time'

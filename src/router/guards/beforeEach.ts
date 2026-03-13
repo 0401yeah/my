@@ -145,6 +145,9 @@ async function handleRouteGuard(
 ): Promise<void> {
   const settingStore = useSettingStore()
   const userStore = useUserStore()
+  console.log('[RouteGuard] User store instance:', userStore)
+  console.log('[RouteGuard] Login status:', userStore.isLogin)
+  console.log('[RouteGuard] Access token:', userStore.accessToken)
 
   // 启动进度条
   if (settingStore.showNprogress) {
@@ -152,6 +155,7 @@ async function handleRouteGuard(
   }
 
   // 1. 检查登录状态
+  console.log('[RouteGuard] 检查登录状态:', { isLogin: userStore.isLogin, toPath: to.path })
   if (!handleLoginStatus(to, userStore, next)) {
     return
   }
@@ -212,7 +216,6 @@ function handleLoginStatus(
   }
 
   // 未登录且访问需要权限的页面，跳转到登录页并携带 redirect 参数
-  userStore.logOut()
   next({
     name: 'Login',
     query: { redirect: to.fullPath }
@@ -224,24 +227,8 @@ function handleLoginStatus(
  * 检查路由是否为静态路由
  */
 function isStaticRoute(path: string): boolean {
-  const checkRoute = (routes: any[], targetPath: string): boolean => {
-    return routes.some((route) => {
-      // 处理动态路由参数匹配
-      const routePath = route.path
-      const pattern = routePath.replace(/:[^/]+/g, '[^/]+').replace(/\*/g, '.*')
-      const regex = new RegExp(`^${pattern}$`)
-
-      if (regex.test(targetPath)) {
-        return true
-      }
-      if (route.children && route.children.length > 0) {
-        return checkRoute(route.children, targetPath)
-      }
-      return false
-    })
-  }
-
-  return checkRoute(staticRoutes, path)
+  // 移除静态路由检查，返回false表示所有路由都需要登录验证
+  return false
 }
 
 /**

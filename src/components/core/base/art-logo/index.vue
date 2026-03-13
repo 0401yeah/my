@@ -1,11 +1,18 @@
 <!-- 系统logo -->
 <template>
-  <div class="flex-cc">
-    <img :style="logoStyle" src="@imgs/common/logo.webp" alt="logo" class="w-full h-full" />
+  <div class="flex-cc" :style="logoStyle">
+    <ArtSvgIcon
+      icon="material-symbols:multiline-chart"
+      class="text-blue-500"
+      style="font-size: 1.5em"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+  import { computed } from 'vue'
+  import ArtSvgIcon from '../art-svg-icon/index.vue'
+
   defineOptions({ name: 'ArtLogo' })
 
   interface Props {
@@ -17,5 +24,8 @@
     size: 36
   })
 
-  const logoStyle = computed(() => ({ width: `${props.size}px` }))
+  const logoStyle = computed(() => ({
+    width: `${props.size}px`,
+    height: `${props.size}px`
+  }))
 </script>

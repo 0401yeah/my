@@ -27,3 +27,16 @@ export function fetchGetUserInfo() {
     // }
   })
 }
+
+/**
+ * 更新用户信息
+ * @param params 用户信息参数
+ * @returns 响应
+ */
+export function fetchUpdateUserInfo(params: Partial<Api.Auth.UserInfo>) {
+  return request.put({
+    url: '/api/user/info',
+    params,
+    showSuccessMessage: true
+  })
+}

@@ -1,0 +1,45 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/parking_management?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: "040401"
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+  servlet:
+    multipart:
+      max-file-size: 4MB
+      max-request-size: 4MB
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.parking.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+jwt:
+  secret: parking-management-secret-key-2024-very-long-secret-key-for-jwt-token-generation
+  expiration: 86400000
+
+logging:
+  level:
+    com.parking: info
+
+# 文件路径配置
+file:
+  path: c:\Users\zhangyurui\Desktop\art\img
+
+# 百度AI配置
+baidu:
+  app:
+    id: 7409511
+  api:
+    key: IgV9AZ6MriQpYSwd9WwJrYbk
+  access:
+    key:
+      secret: VBOtRI3mgQmmOXHx9nC7lgeKg2AtbDQV

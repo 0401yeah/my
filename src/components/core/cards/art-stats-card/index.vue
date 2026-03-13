@@ -1,24 +1,20 @@
 <!-- 统计卡片 -->
 <template>
   <div
-    class="art-card h-32 flex-c px-5 transition-transform duration-200 hover:-translate-y-0.5"
+    class="art-card min-h-32 flex-c px-5 py-4 bg-white border border-gray-100"
     :class="boxStyle"
   >
     <div v-if="icon" class="mr-4 size-11 flex-cc rounded-lg text-xl text-white" :class="iconStyle">
       <ArtSvgIcon :icon="icon"></ArtSvgIcon>
     </div>
     <div class="flex-1">
-      <p class="m-0 text-lg font-medium" :style="{ color: textColor }" v-if="title">
+      <p class="m-0 text-base font-medium" :style="{ color: textColor }" v-if="title">
         {{ title }}
       </p>
-      <ArtCountTo
+      <div
         class="m-0 text-2xl font-medium"
         v-if="count !== undefined"
-        :target="count"
-        :duration="2000"
-        :decimals="decimals"
-        :separator="separator"
-      />
+      >{{ count }}</div>
       <p
         class="mt-1 text-sm text-g-500 opacity-90"
         :style="{ color: textColor }"

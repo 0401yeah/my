@@ -10,8 +10,11 @@
       v-bind="{ ...$attrs, ...props, height, stripe, border, size, headerCellStyle }"
     >
       <template v-for="col in columns" :key="col.prop || col.type">
+        <!-- 渲染全选列 -->
+        <ElTableColumn v-if="col.type === 'selection'" v-bind="cleanColumnProps(col)" />
+
         <!-- 渲染全局序号列 -->
-        <ElTableColumn v-if="col.type === 'globalIndex'" v-bind="{ ...col }">
+        <ElTableColumn v-else-if="col.type === 'globalIndex'" v-bind="{ ...col }">
           <template #default="{ $index }">
             <span>{{ getGlobalIndex($index) }}</span>
           </template>
@@ -34,16 +37,25 @@
               {{ col.label }}
             </slot>
           </template>
-          <template v-if="col.useSlot && col.prop" #default="slotScope">
-            <slot
-              :name="col.slotName || col.prop"
-              v-bind="{
-                ...slotScope,
-                prop: col.prop,
-                value: col.prop ? slotScope.row[col.prop] : undefined
-              }"
-            />
-          </template>
+          <template #default="slotScope">
+              <template v-if="col.useSlot && col.prop">
+                <slot
+                  :name="col.slotName || col.prop"
+                  v-bind="{
+                    ...slotScope,
+                    prop: col.prop,
+                    value: col.prop ? slotScope.row[col.prop] : undefined
+                  }"
+                />
+              </template>
+              <template v-else-if="col.formatter && col.prop">
+                <component v-if="typeof col.formatter(slotScope.row) === 'object'" :is="col.formatter(slotScope.row)" />
+                <span v-else>{{ col.formatter(slotScope.row) }}</span>
+              </template>
+              <template v-else>
+                <span>{{ col.prop ? slotScope.row[col.prop] : '' }}</span>
+              </template>
+            </template>
         </ElTableColumn>
       </template>
 
@@ -246,6 +258,9 @@
     background: isHeaderBackground.value
       ? 'var(--el-fill-color-lighter)'
       : 'var(--default-box-color)',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
     ...(props.headerCellStyle || {}) // 合并用户传入的样式
   }))
 
@@ -260,6 +275,7 @@
     delete columnProps.headerSlotName
     delete columnProps.useSlot
     delete columnProps.slotName
+    delete columnProps.formatter
     return columnProps
   }
 

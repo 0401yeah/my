@@ -203,6 +203,17 @@ export const useUserStore = defineStore(
       localStorage.removeItem(StorageConfig.LAST_USER_ID_KEY)
     }
 
+    /**
+     * 更新用户信息
+     * @param userInfo 用户信息
+     */
+    const updateUserInfo = async (userInfo: Partial<Api.Auth.UserInfo>) => {
+      const { fetchUpdateUserInfo } = await import('@/api/auth')
+      await fetchUpdateUserInfo(userInfo)
+      // 更新本地用户信息
+      info.value = { ...info.value, ...userInfo }
+    }
+
     return {
       language,
       isLogin,
@@ -223,13 +234,14 @@ export const useUserStore = defineStore(
       setLockPassword,
       setToken,
       logOut,
-      checkAndClearWorktabs
+      checkAndClearWorktabs,
+      updateUserInfo
     }
   },
   {
     persist: {
       key: 'user',
-      storage: localStorage
+      storage: sessionStorage
     }
   }
 )

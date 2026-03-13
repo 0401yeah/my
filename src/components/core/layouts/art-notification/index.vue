@@ -103,8 +103,9 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, ref, watch, type Ref, type ComputedRef } from 'vue'
+  import { computed, ref, watch, onMounted, type Ref, type ComputedRef } from 'vue'
   import { useI18n } from 'vue-i18n'
+  import { announcementApi } from '@/api/system'
 
   // 导入头像图片
   import avatar1 from '@/assets/images/avatar/avatar1.webp'
@@ -123,6 +124,8 @@
     time: string
     /** 类型 */
     type: NoticeType
+    /** ID */
+    id?: number
   }
 
   interface MessageItem {
@@ -170,41 +173,11 @@
   const show = ref(false)
   const visible = ref(false)
   const barActiveIndex = ref(0)
+  const loading = ref(false)
 
   const useNotificationData = () => {
     // 通知数据
-    const noticeList = ref<NoticeItem[]>([
-      {
-        title: '新增国际化',
-        time: '2024-6-13 0:10',
-        type: 'notice'
-      },
-      {
-        title: '冷月呆呆给你发了一条消息',
-        time: '2024-4-21 8:05',
-        type: 'message'
-      },
-      {
-        title: '小肥猪关注了你',
-        time: '2020-3-17 21:12',
-        type: 'collection'
-      },
-      {
-        title: '新增使用文档',
-        time: '2024-02-14 0:20',
-        type: 'notice'
-      },
-      {
-        title: '小肥猪给你发了一封邮件',
-        time: '2024-1-20 0:15',
-        type: 'email'
-      },
-      {
-        title: '菜单mock本地真实数据',
-        time: '2024-1-17 22:06',
-        type: 'notice'
-      }
-    ])
+    const noticeList = ref<NoticeItem[]>([])
 
     // 消息数据
     const msgList = ref<MessageItem[]>([
@@ -259,11 +232,39 @@
       }
     ])
 
+    // 加载公告数据
+    const loadAnnouncements = async () => {
+      loading.value = true
+      try {
+        const response: any = await announcementApi.fetchList({ status: 1 }) // 只获取状态为1的公告
+        if (response && response.data && response.data.records) {
+          noticeList.value = response.data.records.map((item: any) => ({
+            id: item.id,
+            title: item.title,
+            time: formatDate(item.gmtCreate),
+            type: 'notice'
+          }))
+        }
+      } catch (error) {
+        console.error('获取公告列表失败:', error)
+      } finally {
+        loading.value = false
+      }
+    }
+
+    // 格式化日期
+    const formatDate = (dateString: string) => {
+      if (!dateString) return ''
+      const date = new Date(dateString)
+      return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`
+    }
+
     return {
       noticeList,
       msgList,
       pendingList,
-      barList
+      barList,
+      loadAnnouncements
     }
   }
 
@@ -397,7 +398,7 @@
   }
 
   // 组合所有逻辑
-  const { noticeList, msgList, pendingList, barList } = useNotificationData()
+  const { noticeList, msgList, pendingList, barList, loadAnnouncements } = useNotificationData()
   const { getNoticeStyle } = useNotificationStyles()
   const { showNotice } = useNotificationAnimation()
   const { handleNoticeAll, handleMsgAll, handlePendingAll } = useBusinessLogic()
@@ -408,11 +409,19 @@
     { handleNoticeAll, handleMsgAll, handlePendingAll }
   )
 
-  // 监听属性变化
+  // 组件加载时加载数据
+  onMounted(() => {
+    loadAnnouncements()
+  })
+
+  // 监听属性变化，当通知面板显示时重新加载数据
   watch(
     () => props.value,
     (newValue) => {
       showNotice(newValue)
+      if (newValue) {
+        loadAnnouncements()
+      }
     }
   )
 </script>

@@ -33,10 +33,8 @@ export class ComponentLoader {
     const module = this.modules[fullPath] || this.modules[fullPathWithIndex]
 
     if (!module) {
-      console.error(
-        `[ComponentLoader] 未找到组件: ${componentPath}，尝试过的路径: ${fullPath} 和 ${fullPathWithIndex}`
-      )
-      return this.createErrorComponent(componentPath)
+      // 当找不到组件时，创建空组件而不是错误组件，避免控制台报错
+      return this.createEmptyComponent()
     }
 
     return module

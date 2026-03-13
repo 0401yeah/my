@@ -1,11 +1,11 @@
 <!-- 表格头部，包含表格大小、刷新、全屏、列设置、其他设置 -->
 <template>
-  <div class="flex-cb max-md:!block" id="art-table-header">
+  <div class="flex-cb" id="art-table-header">
     <div class="flex-wrap">
       <slot name="left"></slot>
     </div>
 
-    <div class="flex-c md:justify-end max-md:mt-3 max-sm:!hidden">
+    <div class="flex-c md:justify-end">
       <div
         v-if="showSearchBar != null"
         class="button"

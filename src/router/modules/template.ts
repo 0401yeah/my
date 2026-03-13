@@ -50,16 +50,6 @@ export const templateRoutes: AppRouteRecord = {
       }
     },
     {
-      path: 'chat',
-      name: 'Chat',
-      component: '/template/chat',
-      meta: {
-        title: 'menus.template.chat',
-        icon: 'ri:message-3-line',
-        keepAlive: true
-      }
-    },
-    {
       path: 'calendar',
       name: 'Calendar',
       component: '/template/calendar',

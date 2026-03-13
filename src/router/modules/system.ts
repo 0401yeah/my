@@ -144,6 +144,17 @@ export const systemRoutes: AppRouteRecord = {
           ]
         }
       ]
+    },
+    {
+      path: 'partner',
+      name: 'Partner',
+      component: '/system/partner/index',
+      meta: {
+        title: 'menus.system.partner',
+        icon: 'ri:building-line',
+        keepAlive: true,
+        roles: ['R_SUPER', 'R_ADMIN']
+      }
     }
   ]
 }

@@ -42,8 +42,16 @@ export class MenuProcessor {
   private async processFrontendMenu(): Promise<AppRouteRecord[]> {
     const userStore = useUserStore()
     const roles = userStore.info?.roles
+    const userType = userStore.info?.userType
 
     let menuList = [...asyncRoutes]
+
+    // 根据用户类型选择不同的菜单
+    if (userType === 1) {
+      // 普通用户，使用用户端菜单
+      // 这里可以根据需要导入用户端菜单模块
+      // 暂时使用相同的菜单，后续可以根据实际需求修改
+    }
 
     // 根据角色过滤菜单
     if (roles && roles.length > 0) {
@@ -105,6 +113,11 @@ export class MenuProcessor {
 
         // 如果有外链或 iframe，保留
         if (item.meta?.isIframe === true || item.meta?.link) {
+          return true
+        }
+
+        // 保留根路径的菜单项（如首页）
+        if (item.path === '/home') {
           return true
         }
 

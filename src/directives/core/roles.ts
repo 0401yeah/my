@@ -61,6 +61,11 @@ function checkRolePermission(el: HTMLElement, binding: RolesBinding): void {
     return
   }
 
+  // 如果用户拥有管理员角色，则自动拥有所有权限
+  if (userRoles.includes('R_ADMIN')) {
+    return
+  }
+
   // 确保指令值为数组格式
   const requiredRoles = Array.isArray(binding.value) ? binding.value : [binding.value]
 

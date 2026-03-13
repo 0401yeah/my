@@ -112,7 +112,6 @@ function extractPagination(
  * 默认响应适配器 - 支持多种常见的API响应格式
  */
 export const defaultResponseAdapter = <T>(response: unknown): ApiResponse<T> => {
-  // 定义支持的字段
   const recordFields = tableConfig.recordFields
 
   if (!response) {
@@ -124,12 +123,6 @@ export const defaultResponseAdapter = <T>(response: unknown): ApiResponse<T> => 
   }
 
   if (typeof response !== 'object') {
-    console.warn(
-      '[tableUtils] 无法识别的响应格式，支持的格式包括: 数组、包含' +
-        recordFields.join('/') +
-        '字段的对象、嵌套data对象。当前格式:',
-      response
-    )
     return { records: [], total: 0 }
   }
 
@@ -138,15 +131,9 @@ export const defaultResponseAdapter = <T>(response: unknown): ApiResponse<T> => 
   let total = 0
   let pagination: Pick<ApiResponse<unknown>, 'current' | 'size'> | undefined
 
-  // 处理标准格式或直接列表
-  records = extractRecords(res, recordFields)
-  total = extractTotal(res, records, tableConfig.totalFields)
-  pagination = extractPagination(res)
-
-  // 如果没有找到，检查嵌套data
-  if (records.length === 0 && 'data' in res && typeof res.data === 'object') {
+  if ('data' in res && typeof res.data === 'object' && res.data !== null) {
     const data = res.data as Record<string, unknown>
-    records = extractRecords(data, ['list', 'records', 'items'])
+    records = extractRecords(data, recordFields)
     total = extractTotal(data, records, tableConfig.totalFields)
     pagination = extractPagination(res, data)
 
@@ -154,12 +141,14 @@ export const defaultResponseAdapter = <T>(response: unknown): ApiResponse<T> => 
       records = res.data as T[]
       total = records.length
     }
+  } else {
+    records = extractRecords(res, recordFields)
+    total = extractTotal(res, records, tableConfig.totalFields)
+    pagination = extractPagination(res)
   }
 
   if (!recordFields.some((field) => field in res) && records.length === 0) {
-    console.warn('[tableUtils] 无法识别的响应格式')
-    console.warn('支持的字段包括: ' + recordFields.join('、'), response)
-    console.warn('扩展字段请到 utils/table/tableConfig 文件配置')
+    // 无法识别的响应格式
   }
 
   const result: ApiResponse<T> = { records, total }

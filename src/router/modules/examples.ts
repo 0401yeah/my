@@ -119,17 +119,6 @@ export const examplesRoutes: AppRouteRecord = {
         icon: 'ri:layout-2-line',
         keepAlive: true
       }
-    },
-    {
-      path: 'socket-chat',
-      name: 'SocketChat',
-      component: '/examples/socket-chat',
-      meta: {
-        title: 'menus.examples.socketChat',
-        icon: 'ri:shake-hands-line',
-        keepAlive: true,
-        showTextBadge: 'New'
-      }
     }
   ]
 }

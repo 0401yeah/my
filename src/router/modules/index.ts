@@ -1,5 +1,4 @@
 import { AppRouteRecord } from '@/types/router'
-import { dashboardRoutes } from './dashboard'
 import { templateRoutes } from './template'
 import { widgetsRoutes } from './widgets'
 import { examplesRoutes } from './examples'
@@ -9,19 +8,17 @@ import { resultRoutes } from './result'
 import { exceptionRoutes } from './exception'
 import { safeguardRoutes } from './safeguard'
 import { helpRoutes } from './help'
+import parkingRoutes from './parking'
 
-/**
- * 导出所有模块化路由
- */
 export const routeModules: AppRouteRecord[] = [
-  dashboardRoutes,
-  templateRoutes,
-  widgetsRoutes,
-  examplesRoutes,
-  systemRoutes,
-  articleRoutes,
-  resultRoutes,
-  exceptionRoutes,
-  safeguardRoutes,
-  ...helpRoutes
+  ...(parkingRoutes as AppRouteRecord[]),
+  templateRoutes as AppRouteRecord,
+  widgetsRoutes as AppRouteRecord,
+  examplesRoutes as AppRouteRecord,
+  systemRoutes as AppRouteRecord,
+  articleRoutes as AppRouteRecord,
+  resultRoutes as AppRouteRecord,
+  exceptionRoutes as AppRouteRecord,
+  safeguardRoutes as AppRouteRecord,
+  ...(helpRoutes as AppRouteRecord[])
 ]

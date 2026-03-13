@@ -24,7 +24,7 @@
  * ## 使用方式
  *
  * ```typescript
- * const params: Api.Auth.LoginParams = { userName: 'admin', password: '123456' }
+ * const params: Api.Auth.LoginParams = { userName: 'your_username', password: 'your_password' }
  * const response: Api.Auth.UserInfo = await fetchUserInfo()
  * ```
  *
@@ -80,8 +80,11 @@ declare namespace Api {
       roles: string[]
       userId: number
       userName: string
-      email: string
       avatar?: string
+      nickname?: string
+      mobile?: string
+      gmtCreate?: string
+      userType?: number
     }
   }
 
@@ -92,25 +95,61 @@ declare namespace Api {
 
     /** 用户列表项 */
     interface UserListItem {
-      id: number
+      user_id: number
+      org_id: number
+      username: string
+      password: string
+      nickname: string
+      email: string
+      mobile: string
+      status: number
       avatar: string
-      status: string
-      userName: string
-      userGender: string
-      nickName: string
-      userPhone: string
-      userEmail: string
-      userRoles: string[]
-      createBy: string
-      createTime: string
-      updateBy: string
-      updateTime: string
+      remark: string
+      gmt_create: string
+      gmt_modified: string
+      gender: string
+      roles: number[]
+      type?: string
+      amount?: number
+      plateNumber?: string
+      parkingLotName?: string
+      name?: string
+      code?: string
+      ownerName?: string
+      tagName?: string
+      tagType?: string
+      contact?: string
+      content?: string
+      operation?: string
+      title?: string
+      summary?: string
     }
 
     /** 用户搜索参数 */
     type UserSearchParams = Partial<
-      Pick<UserListItem, 'id' | 'userName' | 'userGender' | 'userPhone' | 'userEmail' | 'status'> &
-        Api.Common.CommonSearchParams
+      Pick<
+        UserListItem,
+        | 'user_id'
+        | 'nickname'
+        | 'gender'
+        | 'mobile'
+        | 'email'
+        | 'status'
+        | 'type'
+        | 'plateNumber'
+        | 'name'
+        | 'username'
+        | 'title'
+        | 'amount'
+        | 'parkingLotName'
+        | 'code'
+        | 'ownerName'
+        | 'tagName'
+        | 'tagType'
+        | 'contact'
+        | 'operation'
+      > &
+        Api.Common.CommonSearchParams & { date?: string }
     >
 
     /** 角色列表 */

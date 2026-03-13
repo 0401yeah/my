@@ -43,13 +43,21 @@ export class RouteTransformer {
     if (route.meta.isIframe) {
       this.handleIframeRoute(converted, route, depth)
     } else if (this.isFirstLevelRoute(route, depth)) {
-      this.handleFirstLevelRoute(converted, route, component as string)
+      // 一级路由：有子路由的目录，或者没有子路由的独立页面
+      if (children && children.length > 0) {
+        // 有子路由的目录，使用 Layout 包裹
+        this.handleDirectoryRoute(converted, route, children)
+      } else {
+        // 没有子路由的独立页面，使用 Layout 包裹
+        this.handleFirstLevelRoute(converted, route, component as string)
+      }
     } else {
+      // 二级及以下路由：具体的页面组件
       this.handleNormalRoute(converted, component as string)
     }
 
-    // 递归处理子路由
-    if (children?.length) {
+    // 递归处理子路由（只有一级目录才需要递归处理子路由）
+    if (children?.length && depth === 0) {
       converted.children = children.map((child) => this.transform(child, depth + 1))
     }
 
@@ -60,7 +68,25 @@ export class RouteTransformer {
    * 判断是否为一级路由（需要 Layout 包裹）
    */
   private isFirstLevelRoute(route: AppRouteRecord, depth: number): boolean {
-    return depth === 0 && (!route.children || route.children.length === 0)
+    return depth === 0
+  }
+
+  /**
+   * 处理目录类型路由（有子路由的一级菜单）
+   */
+  private handleDirectoryRoute(
+    converted: ConvertedRoute,
+    route: AppRouteRecord,
+    children: AppRouteRecord[]
+  ): void {
+    // 目录使用 Layout 组件
+    converted.component = this.componentLoader.loadLayout()
+    // 提取路径的第一段作为路由路径
+    converted.path = this.extractFirstSegment(route.path || '')
+    // 清空 name，避免路由命名冲突
+    converted.name = ''
+    // 标记为一级路由
+    route.meta.isFirstLevel = true
   }
 
   /**

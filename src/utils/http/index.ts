@@ -64,8 +64,14 @@ const axiosInstance = axios.create({
 /** 请求拦截器 */
 axiosInstance.interceptors.request.use(
   (request: InternalAxiosRequestConfig) => {
-    const { accessToken } = useUserStore()
-    if (accessToken) request.headers.set('Authorization', accessToken)
+    // 每次请求时都重新获取userStore，确保获取最新的token
+    const userStore = useUserStore()
+    console.log('[HTTP] Request URL:', request.url)
+    console.log('[HTTP] Access token:', userStore.accessToken)
+    if (userStore.accessToken) {
+      request.headers.set('Authorization', `Bearer ${userStore.accessToken}`)
+      console.log('[HTTP] Authorization header set:', `Bearer ${userStore.accessToken}`)
+    }
 
     if (request.data && !(request.data instanceof FormData) && !request.headers['Content-Type']) {
       request.headers.set('Content-Type', 'application/json')
@@ -83,6 +89,11 @@ axiosInstance.interceptors.request.use(
 /** 响应拦截器 */
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse<BaseResponse>) => {
+    // 如果是blob类型的响应，直接返回，不进行JSON解析
+    if (response.config.responseType === 'blob') {
+      return response
+    }
+    
     const { code, msg } = response.data
     if (code === ApiStatus.success) return response
     if (code === ApiStatus.unauthorized) handleUnauthorizedError(msg)
@@ -176,6 +187,11 @@ async function request<T = any>(config: ExtendedAxiosRequestConfig): Promise<T> 
 
   try {
     const res = await axiosInstance.request<BaseResponse<T>>(config)
+
+    // 如果是blob类型的响应，直接返回blob
+    if (config.responseType === 'blob') {
+      return res.data as T
+    }
 
     // 显示成功消息
     if (config.showSuccessMessage && res.data.msg) {

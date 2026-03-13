@@ -18,22 +18,10 @@
             @keyup.enter="handleSubmit"
             style="margin-top: 25px"
           >
-            <ElFormItem prop="account">
-              <ElSelect v-model="formData.account" @change="setupAccount">
-                <ElOption
-                  v-for="account in accounts"
-                  :key="account.key"
-                  :label="account.label"
-                  :value="account.key"
-                >
-                  <span>{{ account.label }}</span>
-                </ElOption>
-              </ElSelect>
-            </ElFormItem>
             <ElFormItem prop="username">
               <ElInput
                 class="custom-height"
-                :placeholder="$t('login.placeholder.username')"
+                placeholder="请输入用户名或手机号"
                 v-model.trim="formData.username"
               />
             </ElFormItem>
@@ -47,31 +35,6 @@
                 show-password
               />
             </ElFormItem>
-
-            <!-- 推拽验证 -->
-            <div class="relative pb-5 mt-6">
-              <div
-                class="relative z-[2] overflow-hidden select-none rounded-lg border border-transparent tad-300"
-                :class="{ '!border-[#FF4E4F]': !isPassing && isClickPass }"
-              >
-                <ArtDragVerify
-                  ref="dragVerify"
-                  v-model:value="isPassing"
-                  :text="$t('login.sliderText')"
-                  textColor="var(--art-gray-700)"
-                  :successText="$t('login.sliderSuccessText')"
-                  progressBarBg="var(--main-color)"
-                  :background="isDark ? '#26272F' : '#F1F1F4'"
-                  handlerBg="var(--default-box-color)"
-                />
-              </div>
-              <p
-                class="absolute top-0 z-[1] px-px mt-2 text-xs text-[#f56c6c] tad-300"
-                :class="{ 'translate-y-10': !isPassing && isClickPass }"
-              >
-                {{ $t('login.placeholder.slider') }}
-              </p>
-            </div>
 
             <div class="flex-cb mt-2 text-sm">
               <ElCheckbox v-model="formData.rememberPassword">{{
@@ -115,6 +78,9 @@
   import { fetchLogin } from '@/api/auth'
   import { ElNotification, type FormInstance, type FormRules } from 'element-plus'
   import { useSettingStore } from '@/store/modules/setting'
+  import { storeToRefs } from 'pinia'
+  import { ref, computed, watch } from 'vue'
+  import { useRouter, useRoute } from 'vue-router'
 
   defineOptions({ name: 'Login' })
 
@@ -128,53 +94,14 @@
     formKey.value++
   })
 
-  type AccountKey = 'super' | 'admin' | 'user'
-
-  export interface Account {
-    key: AccountKey
-    label: string
-    userName: string
-    password: string
-    roles: string[]
-  }
-
-  const accounts = computed<Account[]>(() => [
-    {
-      key: 'super',
-      label: t('login.roles.super'),
-      userName: 'Super',
-      password: '123456',
-      roles: ['R_SUPER']
-    },
-    {
-      key: 'admin',
-      label: t('login.roles.admin'),
-      userName: 'Admin',
-      password: '123456',
-      roles: ['R_ADMIN']
-    },
-    {
-      key: 'user',
-      label: t('login.roles.user'),
-      userName: 'User',
-      password: '123456',
-      roles: ['R_USER']
-    }
-  ])
-
-  const dragVerify = ref()
-
   const userStore = useUserStore()
   const router = useRouter()
   const route = useRoute()
-  const isPassing = ref(false)
-  const isClickPass = ref(false)
 
   const systemName = AppConfig.systemInfo.name
   const formRef = ref<FormInstance>()
 
   const formData = reactive({
-    account: '',
     username: '',
     password: '',
     rememberPassword: true
@@ -187,18 +114,6 @@
 
   const loading = ref(false)
 
-  onMounted(() => {
-    setupAccount('super')
-  })
-
-  // 设置账号
-  const setupAccount = (key: AccountKey) => {
-    const selectedAccount = accounts.value.find((account: Account) => account.key === key)
-    formData.account = key
-    formData.username = selectedAccount?.userName ?? ''
-    formData.password = selectedAccount?.password ?? ''
-  }
-
   // 登录
   const handleSubmit = async () => {
     if (!formRef.value) return
@@ -207,12 +122,6 @@
       // 表单验证
       const valid = await formRef.value.validate()
       if (!valid) return
-
-      // 拖拽验证
-      if (!isPassing.value) {
-        isClickPass.value = true
-        return
-      }
 
       loading.value = true
 
@@ -230,15 +139,18 @@
       }
 
       // 存储 token 和登录状态
-      userStore.setToken(token, refreshToken)
+      console.log('Login success, token:', token)
+      // 移除token中的"Bearer "前缀，因为HTTP拦截器会自动添加
+      const cleanToken = token.replace('Bearer ', '')
+      userStore.setToken(cleanToken, refreshToken)
       userStore.setLoginStatus(true)
+      console.log('Login status set to:', userStore.isLogin)
 
       // 登录成功处理
       showLoginSuccessNotice()
 
-      // 获取 redirect 参数，如果存在则跳转到指定页面，否则跳转到首页
-      const redirect = route.query.redirect as string
-      router.push(redirect || '/')
+      // 登录成功后直接跳转到首页，避免循环重定向问题
+      router.push('/')
     } catch (error) {
       // 处理 HttpError
       if (error instanceof HttpError) {
@@ -250,13 +162,7 @@
       }
     } finally {
       loading.value = false
-      resetDragVerify()
     }
-  }
-
-  // 重置拖拽验证
-  const resetDragVerify = () => {
-    dragVerify.value.reset()
   }
 
   // 登录成功提示
